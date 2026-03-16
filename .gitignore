@@ -1,0 +1,31 @@
+# 环境变量（含 Access Key，切勿提交）
+.env
+.env.*
+
+# npx skills add 生成的安装目录
+.agents/
+.agent/
+.claude/
+.cursor/
+.windsurf/
+.augment/
+.continue/
+.cortex/
+.goose/
+.roo/
+.kiro/
+.trae/
+.vibe/
+skills-lock.json
+
+# macOS
+.DS_Store
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# IDE
+.vscode/
+.idea/
