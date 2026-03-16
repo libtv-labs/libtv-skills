@@ -1,6 +1,6 @@
 ---
 name: libtv-skill
-description: agent-im 会话技能 - 通过 OpenAPI 创建会话、发送生图/生视频等消息，并查询会话进展。当用户需要生图、生视频或查询当前会话消息时激活此技能。
+description: agent-im 会话技能 - 通过 OpenAPI 创建会话、发送生图/生视频等消息、上传图片/视频文件，并查询会话进展。当用户需要生图、生视频、上传文件或查询当前会话消息时激活此技能。
 user-invocable: true
 metadata:
   {
@@ -19,13 +19,14 @@ metadata:
 
 # agent-im 会话（生图 / 生视频）
 
-通过 agent-im 的 OpenAPI 创建会话、发送消息（生图、生视频等），并查询会话消息进展。
+通过 agent-im 的 OpenAPI 创建会话、发送消息（生图、生视频等）、上传图片/视频文件，并查询会话消息进展。
 
 ## 功能
 
 1. **创建会话 / 发消息** - 创建新会话或向已有会话发送一条消息（如「生一个动漫视频」）
 2. **查询会话进展** - 根据 sessionId 拉取该会话的消息列表，用于轮询生图/生视频结果
 3. **切换项目** - 将当前 accessKey 绑定的项目切换到新项目，后续 create_session 将使用新 projectUuid
+4. **上传文件** - 上传图片或视频文件到 OSS，返回可访问的 OSS 地址
 
 ## 前置要求
 
@@ -72,6 +73,16 @@ python3 {baseDir}/scripts/query_session.py SESSION_ID --project-id PROJECT_UUID
 python3 {baseDir}/scripts/change_project.py
 ```
 
+### 4. 上传文件
+
+```bash
+# 上传图片
+python3 {baseDir}/scripts/upload_file.py /path/to/image.png
+
+# 上传视频
+python3 {baseDir}/scripts/upload_file.py /path/to/video.mp4
+```
+
 ## 输出格式
 
 **create_session** 返回：
@@ -103,6 +114,13 @@ python3 {baseDir}/scripts/change_project.py
 }
 ```
 
+**upload_file** 返回：
+```json
+{
+  "url": "https://libtv-res.liblib.art/claw/{projectUuid}/{uuid}.png"
+}
+```
+
 ## 最终向用户展示时（OpenClaw）
 
 - **视频地址**：来自 `query_session` 返回的 `messages` 中 assistant 消息的 content 或结果里的视频/图片 URL，即「返回的结果」。
@@ -117,3 +135,5 @@ python3 {baseDir}/scripts/change_project.py
 - 查询会话时可用 `--after-seq` 做增量拉取，便于轮询新消息（含 assistant 回复与生图/生视频结果）
 - 项目画布地址固定为：`https://www.liblib.tv/canvas?projectId=` + projectUuid
 - 切换项目后，Redis 缓存会更新，下次 create_session 将使用新的 projectUuid
+- 上传文件仅支持图片（image/*）和视频（video/*）类型，其他类型会被拒绝
+- 上传返回的 OSS 地址格式为 `https://libtv-res.liblib.art/claw/{projectUuid}/{uuid}{ext}`
