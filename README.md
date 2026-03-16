@@ -15,7 +15,7 @@
 
 | 技能 | 描述 | 脚本 |
 |------|------|------|
-| **libtv-skill** | Agent-IM 会话技能 — 创建会话、发送生图/生视频消息、查询进展 | `create_session.py` `query_session.py` `change_project.py` |
+| **libtv-skill** | Agent-IM 会话技能 — 创建会话、发送生图/生视频消息、上传文件、查询进展 | `create_session.py` `query_session.py` `change_project.py` `upload_file.py` |
 
 ## 📥 快速安装
 
@@ -119,6 +119,24 @@ python3 skills/libtv-skill/scripts/change_project.py
 }
 ```
 
+### 上传文件
+
+```bash
+# 上传图片
+python3 skills/libtv-skill/scripts/upload_file.py /path/to/image.png
+
+# 上传视频
+python3 skills/libtv-skill/scripts/upload_file.py /path/to/video.mp4
+```
+
+**输出示例：**
+
+```json
+{
+  "url": "https://libtv-res.liblib.art/claw/{projectUuid}/{uuid}.png"
+}
+```
+
 </details>
 
 ## 📁 项目结构
@@ -134,7 +152,8 @@ libtv-skills/
             ├── _common.py          # 公共模块（鉴权、HTTP 请求、API 封装）
             ├── create_session.py   # 创建会话 / 发送消息
             ├── query_session.py    # 查询会话消息进展
-            └── change_project.py   # 切换绑定项目
+            ├── change_project.py   # 切换绑定项目
+            └── upload_file.py      # 上传图片 / 视频文件到 OSS
 ```
 
 ## 🔧 API 参考
@@ -154,6 +173,7 @@ Authorization: Bearer <LIBTV_ACCESS_KEY>
 | `POST` | `/openapi/session` | 创建会话 / 发送消息 |
 | `GET` | `/openapi/session/:sessionId` | 查询会话消息列表 |
 | `POST` | `/openapi/session/change-project` | 切换绑定项目 |
+| `POST` | `/openapi/file/upload` | 上传图片 / 视频文件到 OSS |
 
 ### 请求 & 响应
 
@@ -223,6 +243,25 @@ Authorization: Bearer <LIBTV_ACCESS_KEY>
 
 </details>
 
+<details>
+<summary><b>POST /openapi/file/upload</b> — 上传文件</summary>
+
+**Request Body:** `multipart/form-data`，包含 `file` 字段（图片或视频文件）
+
+**Response:**
+
+```json
+{
+  "data": {
+    "url": "https://libtv-res.liblib.art/claw/{projectUuid}/{uuid}.png"
+  }
+}
+```
+
+> 仅支持图片（`image/*`）和视频（`video/*`）类型，其他类型会被拒绝。
+
+</details>
+
 ## 🤖 Agent 集成指南
 
 本技能包设计为被 AI Agent 自动调用。典型的工作流如下：
@@ -242,6 +281,7 @@ Authorization: Bearer <LIBTV_ACCESS_KEY>
 - **结果展示**：任务完成后，同时向用户展示 **生成结果链接**（图片/视频 URL）和 **项目画布链接**（`projectUrl`）
 - **增量轮询**：使用 `--after-seq` 参数进行增量拉取，避免重复获取已处理的消息
 - **项目管理**：当需要隔离不同任务时，使用 `change_project.py` 切换到新项目
+- **文件上传**：在发送生图/生视频指令前，可先用 `upload_file.py` 上传参考图片或素材，获取 OSS 地址后再一并传入消息
 
 ## 🤝 贡献
 
