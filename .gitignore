@@ -2,20 +2,38 @@
 .env
 .env.*
 
-# npx skills add 生成的安装目录
+# npx skills add 生成的安装目录（agent symlinks）
 .agents/
 .agent/
-.claude/
-.cursor/
-.windsurf/
+.adal/
 .augment/
+.claude/
+.codebuddy/
+.commandcode/
 .continue/
 .cortex/
+.cursor/
+.factory/
 .goose/
-.roo/
+.iflow/
+.junie/
+.kilocode/
 .kiro/
+.kode/
+.mcpjam/
+.mux/
+.neovate/
+.openhands/
+.pi/
+.pochi/
+.qoder/
+.qwen/
+.roo/
 .trae/
 .vibe/
+.windsurf/
+.zencoder/
+skills/firewall
 skills-lock.json
 
 # macOS
