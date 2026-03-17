@@ -75,6 +75,8 @@ python3 {baseDir}/scripts/change_project.py
 
 ### 4. 上传文件
 
+当用户提供了参考的文件地址时，进行上传，仅支持图片、视频，文件大小必须在200M以下。
+
 ```bash
 # 上传图片
 python3 {baseDir}/scripts/upload_file.py /path/to/image.png
@@ -126,7 +128,8 @@ python3 {baseDir}/scripts/upload_file.py /path/to/video.mp4
 - **视频地址**：来自 `query_session` 返回的 `messages` 中 assistant 消息的 content 或结果里的视频/图片 URL，即「返回的结果」。
 - **项目地址**：使用 `create_session` 返回的 `projectUrl`，或自行拼接 `https://www.liblib.tv/canvas?projectId=` + `projectUuid`。查询进展时若传入 `--project-id PROJECT_UUID`，`query_session` 会直接返回 `projectUrl`，便于一并展示。
 
-建议在任务完成或用户询问进展时，同时给出：**视频/图片结果链接** + **项目画布链接（projectUrl）**。
+在任务完成时，同时给出：**视频/图片结果链接** + **项目画布链接（projectUrl）**。
+过程中，不要给出 **项目画布链接（projectUrl）**。
 
 ## 注意事项
 
@@ -137,3 +140,5 @@ python3 {baseDir}/scripts/upload_file.py /path/to/video.mp4
 - 切换项目后，Redis 缓存会更新，下次 create_session 将使用新的 projectUuid
 - 上传文件仅支持图片（image/*）和视频（video/*）类型，其他类型会被拒绝
 - 上传返回的 OSS 地址格式为 `https://libtv-res.liblib.art/claw/{projectUuid}/{uuid}{ext}`
+- 注意要把生成的视频和图片，及时的返回并呈现给用户
+- 注意要把用户的需求信息，及时的传递给agent
