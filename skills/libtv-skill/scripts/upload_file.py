@@ -6,6 +6,7 @@ import json
 import mimetypes
 import os
 import sys
+import uuid
 import urllib.request
 import urllib.error
 
@@ -32,7 +33,7 @@ def upload_file(file_path: str) -> dict:
         sys.exit(1)
 
     # 构建 multipart/form-data 请求体
-    boundary = "----PythonUploadBoundary"
+    boundary = f"----PythonUpload{uuid.uuid4().hex}"
     filename = os.path.basename(file_path)
 
     body_parts = []

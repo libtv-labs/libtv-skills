@@ -103,12 +103,3 @@ def change_project() -> dict:
     """
     resp = api_post("/openapi/session/change-project", {})
     return resp.get("data", {})
-
-
-def change_project() -> dict:
-    """
-    切换当前 accessKey 绑定的项目（调用 libtv 切换项目，后续 create_session 将使用新项目）。
-    返回 data: { projectUuid }。
-    """
-    resp = api_post("/openapi/session/change-project", {})
-    return resp.get("data", {})

@@ -15,7 +15,7 @@
 
 | 技能 | 描述 | 脚本 |
 |------|------|------|
-| **libtv-skill** | Agent-IM 会话技能 — 创建会话、发送生图/生视频消息、上传文件、查询进展 | `create_session.py` `query_session.py` `change_project.py` `upload_file.py` |
+| **libtv-skill** | Agent-IM 会话技能 — 创建会话、发送生图/生视频消息、上传文件、查询进展、批量下载结果 | `create_session.py` `query_session.py` `change_project.py` `upload_file.py` `download_results.py` |
 
 ## 📥 快速安装
 
@@ -137,6 +137,32 @@ python3 skills/libtv-skill/scripts/upload_file.py /path/to/video.mp4
 }
 ```
 
+### 下载结果
+
+```bash
+# 从会话自动提取并下载所有图片/视频
+python3 skills/libtv-skill/scripts/download_results.py <SESSION_ID>
+
+# 指定输出目录
+python3 skills/libtv-skill/scripts/download_results.py <SESSION_ID> --output-dir ~/Desktop/my_project
+
+# 指定文件名前缀（如 storyboard_01.png, storyboard_02.png ...）
+python3 skills/libtv-skill/scripts/download_results.py <SESSION_ID> --prefix "storyboard"
+
+# 直接下载指定 URL 列表（无需 session_id）
+python3 skills/libtv-skill/scripts/download_results.py --urls URL1 URL2 URL3 --output-dir ./output
+```
+
+**输出示例：**
+
+```json
+{
+  "output_dir": "/Users/xxx/Downloads/libtv_results",
+  "downloaded": ["/Users/xxx/Downloads/libtv_results/01.png", "..."],
+  "total": 9
+}
+```
+
 </details>
 
 ## 📁 项目结构
@@ -153,7 +179,8 @@ libtv-skills/
             ├── create_session.py   # 创建会话 / 发送消息
             ├── query_session.py    # 查询会话消息进展
             ├── change_project.py   # 切换绑定项目
-            └── upload_file.py      # 上传图片 / 视频文件到 OSS
+            ├── upload_file.py      # 上传图片 / 视频文件到 OSS
+            └── download_results.py # 批量下载生成结果到本地
 ```
 
 ## 🔧 API 参考
@@ -273,12 +300,14 @@ Authorization: Bearer <LIBTV_ACCESS_KEY>
                                     ↓
                           轮询 query_session.py 获取结果
                                     ↓
+                     download_results.py 批量下载到本地
+                                    ↓
                       向用户展示：生成结果 + 项目画布链接
 ```
 
 ### 最佳实践
 
-- **结果展示**：任务完成后，同时向用户展示 **生成结果链接**（图片/视频 URL）和 **项目画布链接**（`projectUrl`）
+- **自动下载**：任务完成后，使用 `download_results.py` 将图片/视频批量下载到本地，再同时向用户展示 **本地文件路径** 和 **项目画布链接**（`projectUrl`）
 - **增量轮询**：使用 `--after-seq` 参数进行增量拉取，避免重复获取已处理的消息
 - **项目管理**：当需要隔离不同任务时，使用 `change_project.py` 切换到新项目
 - **文件上传**：在发送生图/生视频指令前，可先用 `upload_file.py` 上传参考图片或素材，获取 OSS 地址后再一并传入消息
