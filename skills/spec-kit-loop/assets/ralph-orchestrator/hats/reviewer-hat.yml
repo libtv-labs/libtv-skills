@@ -1,0 +1,9 @@
+name: "Reviewer"
+triggers:
+  - build.done
+publishes:
+  - task.start
+  - loop.complete
+backend: claude
+model: claude-sonnet-4-20250514
+timeout_minutes: 10

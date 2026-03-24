@@ -1,0 +1,9 @@
+name: "Builder"
+triggers:
+  - plan.ready
+publishes:
+  - build.done
+  - build.retry
+backend: claude
+model: claude-sonnet-4-20250514
+timeout_minutes: 15

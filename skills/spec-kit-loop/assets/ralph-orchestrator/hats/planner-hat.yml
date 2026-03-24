@@ -1,0 +1,9 @@
+name: "Planner"
+triggers:
+  - task.start
+publishes:
+  - plan.ready
+  - plan.blocked
+backend: claude
+model: claude-sonnet-4-20250514
+timeout_minutes: 5

@@ -16,6 +16,7 @@
 | 技能 | 描述 | 脚本 |
 |------|------|------|
 | **libtv-skill** | Agent-IM 会话技能 — 创建会话、发送生图/生视频消息、上传文件、查询进展、批量下载结果 | `create_session.py` `query_session.py` `change_project.py` `upload_file.py` `download_results.py` |
+| **spec-kit-loop** | 自主 SDD 循环技能 — 使用 Ralph Orchestrator 三帽系统（Planner/Builder/Reviewer）执行规格驱开发，自动循环直到所有任务完成 | `detect-env.ps1` `bootstrap.ps1` `RalphAdapter.ps1` |
 
 ## 📥 快速安装
 
@@ -172,15 +173,30 @@ libtv-skills/
 ├── README.md
 ├── LICENSE
 └── skills/
-    └── libtv-skill/                  # Agent-IM 会话技能
-        ├── SKILL.md                # 技能描述文件（OpenClaw 规范）
-        └── scripts/
-            ├── _common.py          # 公共模块（鉴权、HTTP 请求、API 封装）
-            ├── create_session.py   # 创建会话 / 发送消息
-            ├── query_session.py    # 查询会话消息进展
-            ├── change_project.py   # 切换绑定项目
-            ├── upload_file.py      # 上传图片 / 视频文件到 OSS
-            └── download_results.py # 批量下载生成结果到本地
+    ├── libtv-skill/                  # Agent-IM 会话技能
+    │   ├── SKILL.md                # 技能描述文件（OpenClaw 规范）
+    │   └── scripts/
+    │       ├── _common.py          # 公共模块（鉴权、HTTP 请求、API 封装）
+    │       ├── create_session.py   # 创建会话 / 发送消息
+    │       ├── query_session.py    # 查询会话消息进展
+    │       ├── change_project.py   # 切换绑定项目
+    │       ├── upload_file.py      # 上传图片 / 视频文件到 OSS
+    │       └── download_results.py # 批量下载生成结果到本地
+    └── spec-kit-loop/              # SDD 自主循环技能（Plan → Build → Review）
+        ├── SKILL.md                # 技能描述文件
+        ├── scripts/
+        │   ├── detect-env.ps1      # Tier A/B/C 环境检测
+        │   ├── bootstrap.ps1        # 依赖自举（spec-kit + Claude + Ralph）
+        │   └── RalphAdapter.ps1    # Orchestrator 调度适配器
+        ├── references/
+        │   ├── bootstrap-tiers.md  # Tier 分级逻辑
+        │   ├── hats.md              # 三帽系统定义 + 事件契约
+        │   ├── backend-ralph-orchestrator.md  # Ralph Orchestrator 适配说明
+        │   ├── setup-claude-code.md  # Claude Code 快速上手
+        │   └── setup-openclaw.md    # OpenClaw 快速上手
+        └── assets/
+            ├── prompts/            # 三帽角色提示词
+            └── ralph-orchestrator/hats/  # Ralph YAML 配置
 ```
 
 ## 🔧 API 参考
