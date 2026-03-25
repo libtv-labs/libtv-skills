@@ -11,41 +11,48 @@ import urllib.error
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 sys.path.insert(0, os.path.dirname(__file__))
-from _common import query_session
+from _common import query_session, _die
+
+
+def _extract_from_tool_msg(content):
+    """Extract structured URLs from tool message task_result"""
+    urls = []
+    try:
+        data = json.loads(content)
+        task_result = data.get("task_result", {})
+        for img in task_result.get("images", []):
+            preview = img.get("previewPath", "")
+            if preview:
+                urls.append(preview)
+        for vid in task_result.get("videos", []):
+            preview = vid.get("previewPath", vid.get("url", ""))
+            if preview:
+                urls.append(preview)
+    except (json.JSONDecodeError, AttributeError):
+        pass
+    return urls
+
+
+def _extract_from_text(content, pattern):
+    """Extract URLs from text via regex"""
+    return pattern.findall(content)
 
 
 def extract_urls_from_messages(messages):
     """从会话消息中提取所有图片和视频结果 URL"""
+    url_pattern = re.compile(r'https?://[^\s"\'<>]+\.(?:png|jpg|jpeg|webp|gif|mp4|mov|webm)(?=[\s"\'<>]|$)')
     urls = []
-    url_pattern = re.compile(r'https://libtv-res\.liblib\.art/[^\s"\'<>]+\.(?:png|jpg|jpeg|webp|mp4|mov|webm)')
 
     for msg in messages:
         content = msg.get("content", "")
         if not content or not isinstance(content, str):
             continue
 
-        # 从 task_result 中提取（toolmsg 返回的结果）
         if msg.get("role") == "tool":
-            try:
-                data = json.loads(content)
-                task_result = data.get("task_result", {})
-                for img in task_result.get("images", []):
-                    preview = img.get("previewPath", "")
-                    if preview:
-                        urls.append(preview)
-                for vid in task_result.get("videos", []):
-                    preview = vid.get("previewPath", vid.get("url", ""))
-                    if preview:
-                        urls.append(preview)
-            except (json.JSONDecodeError, AttributeError):
-                pass
+            urls.extend(_extract_from_tool_msg(content))
+        elif msg.get("role") == "assistant":
+            urls.extend(_extract_from_text(content, url_pattern))
 
-        # 从 assistant 文本消息中提取 URL
-        if msg.get("role") == "assistant":
-            found = url_pattern.findall(content)
-            urls.extend(found)
-
-    # 去重保序
     seen = set()
     unique = []
     for u in urls:
@@ -127,6 +134,7 @@ def main():
     # 并行下载
     results = []
     errors = []
+    total = len(tasks)
     with ThreadPoolExecutor(max_workers=args.workers) as pool:
         futures = {pool.submit(download_file, url, fp): (url, fp) for url, fp in tasks}
         for future in as_completed(futures):
@@ -135,6 +143,8 @@ def main():
                 errors.append({"file": fp, "error": err})
             else:
                 results.append(fp)
+            done = len(results) + len(errors)
+            print(f"下载 {done}/{total}: {os.path.basename(fp)}", file=sys.stderr)
 
     # 按文件名排序输出
     results.sort()

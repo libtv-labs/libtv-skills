@@ -3,11 +3,10 @@
 
 import argparse
 import json
-import sys
 import os
 
 sys.path.insert(0, os.path.dirname(__file__))
-from _common import create_session, build_project_url
+from _common import create_session, build_project_url, _die
 
 
 def main():
@@ -48,8 +47,7 @@ def main():
     session_id = data.get("sessionId", "")
 
     if not session_id:
-        print("错误：未返回 sessionId", file=sys.stderr)
-        sys.exit(1)
+        _die("未返回 sessionId")
 
     project_url = build_project_url(project_uuid)
     out = {
