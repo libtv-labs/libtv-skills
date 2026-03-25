@@ -11,7 +11,7 @@ import urllib.request
 import urllib.error
 
 sys.path.insert(0, os.path.dirname(__file__))
-from _common import IM_BASE, ACCESS_KEY
+from _common import IM_BASE, ACCESS_KEY, _die, _ensure_auth
 
 # 允许的 MIME 类型前缀
 ALLOWED_PREFIXES = ("image/", "video/")
@@ -22,15 +22,19 @@ def upload_file(file_path: str) -> dict:
     上传本地文件到 agent-im OSS。
     返回 data: { url }。
     """
+    _ensure_auth()
     if not os.path.isfile(file_path):
-        print(f"错误：文件不存在: {file_path}", file=sys.stderr)
-        sys.exit(1)
+        _die(f"文件不存在: {file_path}")
 
     # 检查 MIME 类型
     mime_type, _ = mimetypes.guess_type(file_path)
     if mime_type and not any(mime_type.startswith(p) for p in ALLOWED_PREFIXES):
-        print(f"错误：不支持的文件类型: {mime_type}，仅支持图片和视频", file=sys.stderr)
-        sys.exit(1)
+        _die(f"不支持的文件类型: {mime_type}，仅支持图片和视频")
+
+    MAX_FILE_SIZE = 200 * 1024 * 1024
+    file_size = os.path.getsize(file_path)
+    if file_size > MAX_FILE_SIZE:
+        _die(f"文件大小 {file_size / 1024 / 1024:.1f}MB 超过 200MB 限制")
 
     # 构建 multipart/form-data 请求体
     boundary = f"----PythonUpload{uuid.uuid4().hex}"
@@ -75,11 +79,9 @@ def upload_file(file_path: str) -> dict:
             return result.get("data", {})
     except urllib.error.HTTPError as e:
         err_body = e.read().decode("utf-8") if e.fp else ""
-        print(f"API 错误 {e.code}: {err_body}", file=sys.stderr)
-        sys.exit(1)
+        _die(f"API 错误 {e.code}: {err_body}")
     except urllib.error.URLError as e:
-        print(f"网络错误: {e.reason}", file=sys.stderr)
-        sys.exit(1)
+        _die(f"网络错误: {e.reason}")
 
 
 def main():
@@ -109,8 +111,7 @@ def main():
     oss_url = data.get("url", "")
 
     if not oss_url:
-        print("错误：未返回 OSS 地址", file=sys.stderr)
-        sys.exit(1)
+        _die("未返回 OSS 地址")
 
     out = {"url": oss_url}
     print(json.dumps(out, ensure_ascii=False, indent=2))

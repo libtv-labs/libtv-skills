@@ -14,15 +14,22 @@ ACCESS_KEY = os.environ.get("LIBTV_ACCESS_KEY", "")
 PROJECT_CANVAS_BASE = "https://www.liblib.tv/canvas?projectId="
 
 
+def _die(msg):
+    """Output JSON error to stdout and exit. Agents parse stdout for results."""
+    print(json.dumps({"error": msg}, ensure_ascii=False))
+    sys.exit(1)
+
+
 def build_project_url(project_id: str) -> str:
     """根据 projectId（即 projectUuid）拼接项目画布地址"""
     if not project_id:
         return ""
     return PROJECT_CANVAS_BASE + project_id.strip()
 
-if not ACCESS_KEY:
-    print("错误：请设置 LIBTV_ACCESS_KEY 环境变量", file=sys.stderr)
-    sys.exit(1)
+
+def _ensure_auth():
+    if not ACCESS_KEY:
+        _die("请设置 LIBTV_ACCESS_KEY 环境变量")
 
 
 def _headers():
@@ -32,42 +39,30 @@ def _headers():
     }
 
 
-def api_post(path: str, body: dict) -> dict:
-    """POST 请求 agent-im OpenAPI"""
+def _request(method, path, body=None, headers=None, timeout=30):
+    _ensure_auth()
     url = f"{IM_BASE.rstrip('/')}{path}"
-    data = json.dumps(body).encode("utf-8")
-    req = urllib.request.Request(
-        url,
-        data=data,
-        method="POST",
-        headers=_headers(),
-    )
+    data = json.dumps(body).encode("utf-8") if body else None
+    hdrs = headers or _headers()
+    req = urllib.request.Request(url, data=data, method=method, headers=hdrs)
     try:
-        with urllib.request.urlopen(req, timeout=30) as resp:
+        with urllib.request.urlopen(req, timeout=timeout) as resp:
             return json.loads(resp.read().decode("utf-8"))
     except urllib.error.HTTPError as e:
         err_body = e.read().decode("utf-8") if e.fp else ""
-        print(f"API 错误 {e.code}: {err_body}", file=sys.stderr)
-        sys.exit(1)
+        _die(f"API 错误 {e.code}: {err_body}")
     except urllib.error.URLError as e:
-        print(f"网络错误: {e.reason}", file=sys.stderr)
-        sys.exit(1)
+        _die(f"网络错误: {e.reason}")
 
 
-def api_get(path: str) -> dict:
-    """GET 请求 agent-im OpenAPI"""
-    url = f"{IM_BASE.rstrip('/')}{path}"
-    req = urllib.request.Request(url, method="GET", headers=_headers())
-    try:
-        with urllib.request.urlopen(req, timeout=30) as resp:
-            return json.loads(resp.read().decode("utf-8"))
-    except urllib.error.HTTPError as e:
-        err_body = e.read().decode("utf-8") if e.fp else ""
-        print(f"API 错误 {e.code}: {err_body}", file=sys.stderr)
-        sys.exit(1)
-    except urllib.error.URLError as e:
-        print(f"网络错误: {e.reason}", file=sys.stderr)
-        sys.exit(1)
+def api_post(path, body):
+    resp = _request("POST", path, body=body)
+    return resp
+
+
+def api_get(path):
+    resp = _request("GET", path)
+    return resp
 
 
 def create_session(session_id: str = "", message: str = "") -> dict:
