@@ -328,3 +328,40 @@ Authorization: Bearer <LIBTV_ACCESS_KEY>
 本项目采用 [MIT License](LICENSE) 开源。
 
 Copyright © 2026 [libtv-labs](https://github.com/libtv-labs)
+---
+
+## 🆕 Seedance2.0 特性介绍
+
+以下内容来自 [LibTV 官方介绍](https://www.liblib.tv/)：
+
+### 价格低、模型全、速度快
+
+LibTV 目前的会员 SKU 是全网性价比最高的。以 Seedance2.0 1080p 计算：
+
+| 平台 | 年费会员单价 |
+|------|-------------|
+| 即梦官网 | 每秒 ~1.4 元 |
+| **LibTV** | **每秒 ~0.95 元** |
+
+算上赠送的 720p 视频条数以及其它模型，会员 SKU 价格低 **76%** 左右。
+
+### 模型覆盖
+
+- **Seedance2.0** — 复杂剧情理解、多镜头转场、人物动作细节，最适合短剧和电影级内容
+- **Happy Horse** — 强指令下更细腻的人物刻画和真实度，面部细节更自然
+- **Kling O3** — 4K 高清画质，物理交互能力强大
+- **Lib Nano Pro/2、Lib Image** — 最高支持 4K 画质的图片模型
+
+### 双入口设计
+
+- **创作者入口** — 无限画布、完整创作工具链，从剧本到剪辑合成全流程
+- **Agent 入口** — Skill 接口打包，OpenClaw、Hermes、Codex、Claude Code 均可接入
+
+### 核心功能
+
+- **4步30分钟完成独立短片** — 文本节点自动生成剧本 → 角色三视图锁定形象 → 一键生成分镜 → 视频生成
+- **小龙虾全自动跑视频** — 一句话需求，Agent 自动完成全流程
+- **宫格分镜组** — 25宫格连贯分镜 + 宫格切分，风格一致且省成本
+
+👉 LibTV 官网：https://www.liblib.tv/
+👉 GitHub：https://github.com/libtv-labs/libtv-skills
